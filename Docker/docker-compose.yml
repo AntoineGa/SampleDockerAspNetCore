@@ -1,0 +1,22 @@
+version: '3'
+services:
+  db:
+    image: microsoft/mssql-server-windows-developer
+    environment:
+      sa_password: "P@ssw0rd!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433" # REMARK: This is currently required, needs investigation
+    healthcheck:
+      test: [ "CMD", "sqlcmd", "-U", "sa", "-P", "P@ssw0rd!", "-Q", "select 1" ]
+      interval: 1s
+      retries: 30
+
+  web:
+    image: jcorioland/sampledotnetcore
+    environment:
+      - "Data:DefaultConnection=Server=db,1433;Database=SampleDotnetCore;User Id=sa;Password=P@ssw0rd!;MultipleActiveResultSets=True"
+    depends_on:
+      - db
+    ports:
+      - "5000:5000"
